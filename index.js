@@ -241,14 +241,13 @@ async function handleStartElection(interaction) {
 
     const embed = new EmbedBuilder()
         .setTitle(electionTitle)
-        .setDescription(`
-            Une élection a été lancée pour le rôle <@&${role.id}>.
+        .setDescription(`Une élection a été lancée pour le rôle <@&${role.id}>.
 
-            **Mode d'élection** : ${electionMode}
-            **Nombre d'électeurs** : ${electionData.eligibleMembers.size}
+**Mode d'élection** : ${electionMode}
+**Nombre d'électeurs** : ${electionData.eligibleMembers.size}
 
-            **Candidats :** 
-            ${candidateList}`)
+**Candidats :** 
+${candidateList}`)
         .setColor(0x00AE86)
         .setFooter({ text: `Votes : 0/${electionData.eligibleMembers.size}` });
 
