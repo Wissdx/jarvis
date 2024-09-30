@@ -433,18 +433,21 @@ async function handleVoteMenu(interaction) {
     };
 }
 
-async function modifyAndEndAnnouncement() {
+async function modifyAndEndAnnouncement(options) {
     try {
         if (!electionData.announcementMessageId || !electionData.announcementChannelId) return;
 
         const channel = await client.channels.fetch(electionData.announcementChannelId);
         const message = await channel.messages.fetch(electionData.announcementMessageId);
 
+        const currentVotes = electionData.usersWhoVoted.size;
+        const totalVotes = electionData.eligibleMembers.size;
+
         const embed = message.embeds[0];
 
         const updatedEmber = EmbedBuilder.from(embed)
             .setDescription('L\'élection est terminée. Les résultats sont affichés ci-dessous.')
-            .setFooter('');
+            .setFooter({ text: `Votes : ${currentVotes}/${totalVotes}` });
 
         await message.edit({ embeds: [updatedEmber], components: [] });
     } catch (error) {
