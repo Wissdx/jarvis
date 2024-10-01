@@ -1,6 +1,12 @@
 const { Client, GatewayIntentBits, Partials, EmbedBuilder, PermissionsBitField, REST, Routes, ActionRowBuilder, StringSelectMenuBuilder, ButtonBuilder, ButtonStyle, SlashCommandBuilder } = require('discord.js');
 require('dotenv').config();
 
+const requiredEnvVariables = ['DISCORD_BOT_TOKEN', 'CLIENT_ID', 'GUILD_ID'];
+if (!requiredEnvVariables.every(variable => process.env[variable])) {
+    console.error('Please make sure to create a .env file with the following variables:', requiredEnvVariables.join(', '));
+    process.exit(1);
+}
+
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
