@@ -1,7 +1,7 @@
 const { Client, GatewayIntentBits, Partials, EmbedBuilder, PermissionsBitField, REST, Routes, ActionRowBuilder, StringSelectMenuBuilder, ButtonBuilder, ButtonStyle, SlashCommandBuilder } = require('discord.js');
 require('dotenv').config();
 
-const requiredEnvVariables = ['DISCORD_BOT_TOKEN', 'CLIENT_ID', 'GUILD_ID'];
+const requiredEnvVariables = ['DISCORD_BOT_TOKEN', 'CLIENT_ID', 'GUILD_ID', 'BOT_VERSION'];
 if (!requiredEnvVariables.every(variable => process.env[variable])) {
     console.error('Please make sure to create a .env file with the following variables:', requiredEnvVariables.join(', '));
     process.exit(1);
@@ -84,6 +84,10 @@ const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_BOT_TOKEN)
 
 client.once('ready', () => {
     console.log(`Connecté en tant que ${client.user.tag}`);
+    client.user.setPresence({
+        activities: [{ name: `Version ${process.env.BOT_VERSION}` }],
+        status: 'online'
+    });
 });
 
 client.on('interactionCreate', async interaction => {
