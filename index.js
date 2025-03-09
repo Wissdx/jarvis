@@ -91,11 +91,22 @@ client.once('ready', () => {
         status: 'online'
     });
 
-    sendNewGrades(client);
+    try {
+        sendNewGrades(client);
+    } catch (e) {
+        console.err("error checking for new grades")
+        console.error(e)
+    }
+
 
     const TEN_MINUTES_MILLISECONDS = 600000;
     setInterval(() => {
-        sendNewGrades(client)
+        try {
+            sendNewGrades(client);
+        } catch (e) {
+            console.err("error checking for new grades")
+            console.error(e)
+        }
     }, TEN_MINUTES_MILLISECONDS)
 
 });
