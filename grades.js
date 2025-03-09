@@ -4,7 +4,7 @@ dotenv.config()
 
 const cachePath = './previousGrades.json';
 
-async function sendNewGrades() {
+export async function sendNewGrades(discordClient) {
     let token = await getAccessToken();
 
     const bearerHeader = {
@@ -34,7 +34,7 @@ async function sendNewGrades() {
     let isMultiple = coursesWithNewGrades.length > 1
     const message = `💯 ATTENTION 💯\n\n  nouvelle${isMultiple ? 's' : ''} note${isMultiple ? 's' : ''} 🙊:\n- ${coursesWithNewGrades.join('\n- ')}`;
 
-    const channel = await client.channels.fetch(process.env.CHANNEL_ID);
+    const channel = await discordClient.channels.fetch(process.env.CHANNEL_ID);
     if (channel) {
         await channel.send(message);
     }
@@ -144,5 +144,3 @@ function getCurrentSchoolYear() {
 function getEncodedCredentials(username, password) {
     return Buffer.from(`${username}:${password}`).toString('base64');
 }
-
-sendNewGrades();
