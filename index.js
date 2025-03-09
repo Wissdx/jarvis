@@ -1,5 +1,6 @@
 import { Client, GatewayIntentBits, Partials, EmbedBuilder, PermissionsBitField, REST, Routes, ActionRowBuilder, StringSelectMenuBuilder, ButtonBuilder, ButtonStyle, SlashCommandBuilder } from 'discord.js';
 import dotenv from 'dotenv';
+import { sendNewGrades } from './grades';
 dotenv.config()
 
 const requiredEnvVariables = ['DISCORD_BOT_TOKEN', 'CLIENT_ID', 'GUILD_ID', 'BOT_VERSION', 'MYGES_API_USERNAME', 'MYGES_API_PASSWORD', 'GRADES_CHANNEL_ID'];
@@ -89,6 +90,14 @@ client.once('ready', () => {
         activities: [{ name: `Version ${process.env.BOT_VERSION}` }],
         status: 'online'
     });
+
+    sendNewGrades(client);
+
+    const TEN_MINUTES_MILLISECONDS = 600000;
+    setInterval(() => {
+        sendNewGrades(client)
+    }, TEN_MINUTES_MILLISECONDS)
+
 });
 
 client.on('interactionCreate', async interaction => {
