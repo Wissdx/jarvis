@@ -1,7 +1,9 @@
-const { Client, GatewayIntentBits, Partials, EmbedBuilder, PermissionsBitField, REST, Routes, ActionRowBuilder, StringSelectMenuBuilder, ButtonBuilder, ButtonStyle, SlashCommandBuilder } = require('discord.js');
-require('dotenv').config();
+import { Client, GatewayIntentBits, Partials, EmbedBuilder, PermissionsBitField, REST, Routes, ActionRowBuilder, StringSelectMenuBuilder, ButtonBuilder, ButtonStyle, SlashCommandBuilder } from 'discord.js';
+import dotenv from 'dotenv';
+import { sendNewGrades } from './grades';
+dotenv.config()
 
-const requiredEnvVariables = ['DISCORD_BOT_TOKEN', 'CLIENT_ID', 'GUILD_ID', 'BOT_VERSION'];
+const requiredEnvVariables = ['DISCORD_BOT_TOKEN', 'CLIENT_ID', 'GUILD_ID', 'BOT_VERSION', 'MYGES_API_USERNAME', 'MYGES_API_PASSWORD', 'GRADES_CHANNEL_ID'];
 if (!requiredEnvVariables.every(variable => process.env[variable])) {
     console.error('Please make sure to create a .env file with the following variables:', requiredEnvVariables.join(', '));
     process.exit(1);
@@ -88,6 +90,25 @@ client.once('ready', () => {
         activities: [{ name: `Version ${process.env.BOT_VERSION}` }],
         status: 'online'
     });
+
+    try {
+        sendNewGrades(client);
+    } catch (e) {
+        console.err("error checking for new grades")
+        console.error(e)
+    }
+
+
+    const TEN_MINUTES_MILLISECONDS = 600000;
+    setInterval(() => {
+        try {
+            sendNewGrades(client);
+        } catch (e) {
+            console.err("error checking for new grades")
+            console.error(e)
+        }
+    }, TEN_MINUTES_MILLISECONDS)
+
 });
 
 client.on('interactionCreate', async interaction => {
