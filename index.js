@@ -1,6 +1,6 @@
 import { Client, GatewayIntentBits, Partials, EmbedBuilder, PermissionsBitField, REST, Routes, ActionRowBuilder, StringSelectMenuBuilder, ButtonBuilder, ButtonStyle, SlashCommandBuilder } from 'discord.js';
 import dotenv from 'dotenv';
-import { sendNewGrades } from './grades';
+import { sendNewGrades } from './grades.js';
 dotenv.config()
 
 const requiredEnvVariables = ['DISCORD_BOT_TOKEN', 'CLIENT_ID', 'GUILD_ID', 'BOT_VERSION', 'MYGES_API_USERNAME', 'MYGES_API_PASSWORD', 'GRADES_CHANNEL_ID'];
