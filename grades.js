@@ -19,7 +19,7 @@ export async function sendNewGrades(discordClient) {
         return;
     }
 
-    if (!existFile()) {
+    if (!existCacheFile()) {
         saveGradesData(currentGrades);
         return;
     }
@@ -34,7 +34,7 @@ export async function sendNewGrades(discordClient) {
     let isMultiple = coursesWithNewGrades.length > 1
     const message = `💯 ATTENTION 💯\n\n  nouvelle${isMultiple ? 's' : ''} note${isMultiple ? 's' : ''} 🙊:\n- ${coursesWithNewGrades.join('\n- ')}`;
 
-    const channel = await discordClient.channels.fetch(process.env.CHANNEL_ID);
+    const channel = await discordClient.channels.fetch(process.env.GRADES_CHANNEL_ID);
     if (channel) {
         await channel.send(message);
     }
@@ -120,7 +120,7 @@ async function getAccessToken() {
     }
 }
 
-function existFile() {
+function existCacheFile() {
     return existsSync(cachePath) && lstatSync(cachePath).isFile
 }
 
