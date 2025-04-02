@@ -12,7 +12,7 @@ import {
 	ButtonStyle,
 	SlashCommandBuilder,
 } from "discord.js";
-import { handleInsultTracker } from "./commands/insult_tracker.js";
+import { handleSocialCredit } from "./commands/social_credit_tracker.js";
 import dotenv from "dotenv";
 import { sendNewGrades } from "./grades.js";
 dotenv.config();
@@ -98,8 +98,8 @@ const guildCommands = [
 		.setName("relance")
 		.setDescription("Mentionne chaque personne qui n'a pas encore voté"),
 	new SlashCommandBuilder()
-		.setName("insult_tracker")
-		.setDescription("Affiche toutes les insultes de l'utilisateur mentionné")
+		.setName("social_credit")
+		.setDescription("Vérifie le crédit social de l'utilisateur mentionné")
 		.addUserOption((option) =>
 			option
 				.setName("utilisateur")
@@ -173,8 +173,8 @@ client.on("interactionCreate", async (interaction) => {
 				case "relance":
 					await handleRelance(interaction);
 					break;
-				case "insult_tracker":
-					await handleInsultTracker(interaction);
+				case "social_credit":
+					await handleSocialCredit(interaction);
 					break;
 				default:
 					await interaction.reply({

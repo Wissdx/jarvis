@@ -56,11 +56,21 @@ const insults = [
 	"bite",
 ];
 
+const images = {
+	perfect:
+		"https://images.steamusercontent.com/ugc/1874060099622312925/B6030AC366ABC8133394A09D1229ECFC07EF5675/?imw=5000&imh=5000&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=false",
+	good: "https://www.diggitmagazine.com/sites/default/files/styles/content_image_fluid_md/public/DCS%2520SoCS%2520Meme%2520Original%2520r%2520scm.jpg.webp?itok=Ou07fCZm",
+	okay: "https://www.diggitmagazine.com/sites/default/files/styles/content_image_fluid_md/public/DCS%2520SoCS%2520Meme%2520Cena%2520BingChiling%2520r%2520memes.jpg.webp?itok=3gJD1BIy",
+	bad: "https://media.tenor.com/idNGiIHv6cgAAAAe/social-credit-score-social.png",
+	disastrous:
+		"https://i.pinimg.com/736x/3e/93/df/3e93df19c2a27b3b1fe3d482d47e2940.jpg",
+};
+
 function escapeRegExp(string) {
 	return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-export async function handleInsultTracker(interaction) {
+export async function handleSocialCredit(interaction) {
 	const targetUser = interaction.options.getUser("utilisateur");
 
 	if (!targetUser) {
@@ -77,6 +87,7 @@ export async function handleInsultTracker(interaction) {
 			(channel) => channel.type === 0,
 		);
 
+		const BASE_CREDIT = 100;
 		let totalInsults = 0;
 		const insultCounts = {};
 
@@ -160,12 +171,26 @@ export async function handleInsultTracker(interaction) {
 
 		const header = "Compt. │ Insulte";
 		const divider = `${"─".repeat(7 + maxCountLength)}${"─".repeat(30)}`;
+		const socialCredits = BASE_CREDIT - totalInsults * 2;
+		let socialCreditStatus;
+
+		if (socialCredits >= 75) {
+			socialCreditStatus = images.perfect;
+		} else if (socialCredits >= 50) {
+			socialCreditStatus = images.good;
+		} else if (socialCredits >= 25) {
+			socialCreditStatus = images.okay;
+		} else if (socialCredits >= 0) {
+			socialCreditStatus = images.bad;
+		} else {
+			socialCreditStatus = images.disastrous;
+		}
 
 		const embed = {
 			color: 0xff0000,
-			title: `Insulte Tracker pour ${targetUser.username}`,
+			title: `Calculateur crédits sociaux pour ${targetUser.username}`,
 			description: [
-				`**Total d'insultes:** ${totalInsults}`,
+				`**Crédit sociaux restants:** ${socialCredits}`,
 				"",
 				"```",
 				header,
@@ -174,7 +199,7 @@ export async function handleInsultTracker(interaction) {
 				"```",
 			].join("\n"),
 			thumbnail: {
-				url: targetUser.displayAvatarURL({ dynamic: true }),
+				url: socialCreditStatus,
 			},
 			timestamp: new Date(),
 		};
