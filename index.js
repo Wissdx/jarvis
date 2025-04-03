@@ -13,6 +13,7 @@ import {
 	SlashCommandBuilder,
 } from "discord.js";
 import { handleSocialCredit } from "./commands/social_credit_tracker.js";
+import { getAllMessages, storeMessage } from "./commands/get_all_messages.js";
 import dotenv from "dotenv";
 import { sendNewGrades } from "./grades.js";
 dotenv.config();
@@ -39,6 +40,7 @@ const client = new Client({
 		GatewayIntentBits.Guilds,
 		GatewayIntentBits.GuildMessages,
 		GatewayIntentBits.GuildMembers,
+		GatewayIntentBits.MessageContent,
 	],
 	partials: [Partials.Channel, Partials.Message, Partials.User],
 });
@@ -134,6 +136,8 @@ client.once("ready", () => {
 		activities: [{ name: `Version ${process.env.BOT_VERSION}` }],
 		status: "online",
 	});
+
+	getAllMessages(client);
 
 	try {
 		sendNewGrades(client);
@@ -232,6 +236,12 @@ client.on("interactionCreate", async (interaction) => {
 		}
 	}
 });
+
+client.on("messageCreate", async (message) => {
+	if (message.author.bot) return;
+
+	storeMessage(message);
+})
 
 async function handleNonVotants(interaction) {
 	if (

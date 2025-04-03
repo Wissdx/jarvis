@@ -1,62 +1,20 @@
-const insults = [
-	"merde",
-	"con",
-	"connerie",
-	"bullshit",
-	"salope",
-	"putain",
-	"putin",
-	"ptn",
-	"pute",
-	"nazi",
-	"enculé",
-	"bordel",
-	"nique",
-	"chié",
-	"fils de pute",
-	"fdp",
-	"va te faire",
-	"foutre",
-	"connard",
-	"salopard",
-	"branler",
-	"pd",
-	"sucer",
-	"fion",
-	"trou du cul",
-	"zoophile",
-	"raciste",
-	"homophobe",
-	"connasse",
-	"bouffon",
-	"nique ta mère",
-	"ntm",
-	"ta gueule",
-	"tg",
-	"saloperie",
-	"sac à merde",
-	"tarlouze",
-	"fils de chien",
-	"taré",
-	"putain de merde",
-	"bâtard",
-	"pouffiasse",
-	"gogole",
-	"pétasse",
-	"gros porc",
-	"sale bâtard",
-	"suceur",
-	"imbécile",
-	"clodo",
-	"culs",
-	"foutre",
-	"baiseur",
-	"ordure",
-	"gros suceur",
-	"bite",
-];
+import { readFileSync } from "node:fs";
+import { CACHE_PATH } from "./get_all_messages.js";
+import { INSULTS } from "./insults.js";
 
-const insultRegex = new RegExp(insults.join("|"), 'g');
+const BASE_CREDIT = 100;
+
+const normalizeString = (str) => {
+	return str
+		.normalize("NFD")
+		.replace(/\p{Diacritic}/gu, "")
+		.toLowerCase();
+}
+
+const insultRegex = new RegExp(
+	INSULTS.map((insult) => normalizeString(insult)).join("|"),
+	"g",
+)
 
 const images = {
 	perfect:
@@ -69,41 +27,26 @@ const images = {
 };
 
 export async function handleSocialCredit(interaction) {
-	try{
-		const channels = getChannels(interaction.guild);
-		const targetUser = interaction.options.getUser("utilisateur");
-		const BASE_CREDIT = 100;
-	
-		const messagesPromises = channel.map((channel) =>
-			getAllMessagesInChannel(channel, targetUser),
-		);
-		const messages = await Promise.all(messagesPromises);
-		const allMessages = messages.flat();
-	
-		const insultsCount = new Map();
-		allMessages.forEach((message) => {
-			const content = message.content
-				.normalize("NFD")
-				.replace(/\p{Diacritic}/gu, "");
-	
-			getInsultsInMessage(content).forEach((insult) => {
-				const normalizedInsult = insult.normalize("NFD").replace(/\p{Diacritic}/gu, "");
-				insultsCount.set(normalizedInsult, (insultsCount.get(normalizedInsult) || 0) + 1);
-			});
-		});
+	try {
+		await interaction.deferReply({ ephemeral: true });
 
-		if (totalInsults === 0) {
-			return interaction.followUp({
-				content: `Aucune insulte trouvée pour ${targetUser.tag}.`,
+		const targetUser = interaction.options.getUser("utilisateur");
+		if (!targetUser) {
+			await interaction.followUp({
+				content: "Utilisateur introuvable.",
 				ephemeral: true,
 			});
+			return;
 		}
 
-		const totalInsults = Array.from(insultsCount.values()).reduce((a, b) => a + b, 0);
-		const sortedInsults = Array.from(insultsCount.entries())
-			.filter(([_, count]) => count > 0)
-			.sort((a, b) => b[1] - a[1]);
-		
+		const data = readFileSync(CACHE_PATH, "utf8");
+		const insultsCount = JSON.parse(data);
+
+		const userInsults = insultsCount[targetUser.id];
+
+		const sortedInsults = Object.entries(userInsults).sort((a, b) => b[1] - a[1]);
+		const totalInsults = sortedInsults.reduce((sum, [_, count]) => sum + count, 0);
+
 		const tableRows = sortedInsults.map(([insult, count]) => {
 			const countStr = count.toString().padStart(5);
 			return `${countStr} │ ${insult}`;
@@ -115,13 +58,12 @@ export async function handleSocialCredit(interaction) {
 
 		const header = "Compt. │ Insulte";
 		const divider = `${"─".repeat(7 + maxCountLength)}${"─".repeat(30)}`;
-		const socialCredits = BASE_CREDIT - totalInsults * 2;
+		const socialCredits = BASE_CREDIT - totalInsults;
 		let socialCreditStatus;
 
 		if (socialCredits >= 75) {
 			socialCreditStatus = images.perfect;
-		}
-		else if (socialCredits >= 50) {
+		} else if (socialCredits >= 50) {
 			socialCreditStatus = images.good;
 		} else if (socialCredits >= 25) {
 			socialCreditStatus = images.okay;
@@ -150,8 +92,7 @@ export async function handleSocialCredit(interaction) {
 		};
 
 		await interaction.followUp({ embeds: [embed] });
-
-	} catch {
+	} catch (error) {
 		console.error("Error in insult tracker:", error);
 		await interaction.followUp({
 			content: "Une erreur s'est produite lors de la recherche d'insultes.",
@@ -160,35 +101,11 @@ export async function handleSocialCredit(interaction) {
 	}
 }
 
-const getInsultsInMessage = (message) => {
-	if(!message.content) return false;
+export const getInsultsInMessage = (message) => {
+	if (!message.content) return false;
 	if (message.author.bot) return false;
-	const insultsInMessage = message.toLowerCase().content.match(insultRegex);
-	if(!insultsInMessage) return [];
+	const content = normalizeString(message.content);
+	const insultsInMessage = content.match(insultRegex);
+	if (!insultsInMessage) return [];
 	return insultsInMessage;
-}
-
-
-
-const getAllMessagesInChannel = async (channel, targetUser) => {
-	// Get all messages in a channel without limit
-	const messages = [];
-	let lastMessageId = null;
-	
-	while (true) {
-		const fetchOptions = { limit: 100 };
-		if (lastMessageId) fetchOptions.before = lastMessageId;
-		const fetchedMessages = await channel.messages.fetch(fetchOptions);
-		if (fetchedMessages.size === 0) break;
-		messages.push(...fetchedMessages.values());
-		lastMessageId = fetchedMessages.last().id;
-	}
-	return messages.filter((message) => message.author.id === targetUser.id);
-}
-
-const getChannels = (guild) => {
-	const channels = guild.channels.cache.filter(
-		(channel) => channel.type === 0,
-	);
-	return channels;
-}
+};
