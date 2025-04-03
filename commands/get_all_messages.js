@@ -57,7 +57,7 @@ export async function getAllMessages(client) {
 	console.log("All messages stored successfully.");
 }
 
-export function storeMessage(message) {
+export async function storeMessage(message, client) {
 	const storedData = JSON.parse(readFileSync(CACHE_PATH, "utf8"));
 
 	if (!storedData[message.author.id]) {
@@ -77,14 +77,21 @@ export function storeMessage(message) {
 
 	writeFileSync(CACHE_PATH, JSON.stringify(storedData, null, 2), "utf8");
 
-	const userInsults = storedData[targetUser.id];
+	const userInsults = storedData[message.author.id];
 
 	const sortedInsults = Object.entries(userInsults).sort((a, b) => b[1] - a[1]);
 	const totalInsults = sortedInsults.reduce((sum, [_, count]) => sum + count, 0);
 
-	let newNickName = `${message.author.username}[${100-totalInsults}]`;
-	if(/.*\[-?[0-9]+\]/.test(message.author.username)) newNickName = message.author.username.replace(/\[-?[0-9]+\]/, `[-${100-totalInsults}]`);
-	message.author.setNickname(
+	let member = await message.guild.members.fetch(message.author.id).catch(console.error);
+
+	if (!member) {
+		console.error("Member not found in the guild.");
+		return;
+	}
+	let nickname = member.displayName || message.author.username;
+	let newNickName = `${nickname} [${100-totalInsults}]`;
+	if(/^.* \[-?[0-9]+\]$/.test(nickname)) newNickName = nickname.replace(/\[-?[0-9]+\]/, `[${100-totalInsults}]`);
+	member.setNickname(
 		newNickName,
 		"Updated nickname based on insults count"
 	).catch(console.error);
