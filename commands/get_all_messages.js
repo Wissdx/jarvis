@@ -13,7 +13,7 @@ export async function getAllMessages(client) {
 
 	const storedData = {};
 
-	const channelsResults = channels.forEach(async (channel) => {
+	const channelsResults = channels.map(async (channel) => {
 		try {
 			let lastMessageId = null;
 
