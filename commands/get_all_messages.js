@@ -76,4 +76,19 @@ export function storeMessage(message) {
 	}
 
 	writeFileSync(CACHE_PATH, JSON.stringify(storedData, null, 2), "utf8");
+
+	const data = readFileSync(CACHE_PATH, "utf8");
+	const insultsCount = JSON.parse(data);
+
+	const userInsults = insultsCount[targetUser.id];
+
+	const sortedInsults = Object.entries(userInsults).sort((a, b) => b[1] - a[1]);
+	const totalInsults = sortedInsults.reduce((sum, [_, count]) => sum + count, 0);
+
+	let newNickName = `${message.author.username}[${100-totalInsults}]`;
+	if(/.*\[-?[0-9]+\]/.test(message.author.username)) newNickName = message.author.username.replace(/\[-?[0-9]+\]/, `[-${100-totalInsults}]`);
+	message.author.setNickname(
+		newNickName,
+		"Updated nickname based on insults count"
+	).catch(console.error);
 }
