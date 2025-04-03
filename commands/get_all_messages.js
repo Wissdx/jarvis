@@ -77,10 +77,7 @@ export function storeMessage(message) {
 
 	writeFileSync(CACHE_PATH, JSON.stringify(storedData, null, 2), "utf8");
 
-	const data = readFileSync(CACHE_PATH, "utf8");
-	const insultsCount = JSON.parse(data);
-
-	const userInsults = insultsCount[targetUser.id];
+	const userInsults = storedData[targetUser.id];
 
 	const sortedInsults = Object.entries(userInsults).sort((a, b) => b[1] - a[1]);
 	const totalInsults = sortedInsults.reduce((sum, [_, count]) => sum + count, 0);
