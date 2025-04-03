@@ -1,5 +1,5 @@
 import { writeFileSync, readFileSync } from "node:fs";
-import { getInsultsInMessage, getBrainrotInMessage } from "./social_credit_tracker.js";
+import { getInsultsInMessage } from "./social_credit_tracker.js";
 
 export const CACHE_PATH = "./cache/messages.json";
 
@@ -31,17 +31,10 @@ export async function getAllMessages(client) {
 					if (message.author.bot) return;
 
 					if (!storedData[message.author.id]) {
-						storedData[message.author.id] = {
-							brainrot: 0,
-						};
+						storedData[message.author.id] = {};
 					}
 
 					const insults = getInsultsInMessage(message);
-					const brainrot = getBrainrotInMessage(message);
-
-					if (brainrot) {
-						storedData[message.author.id].brainrot += brainrot.length;
-					}
 
 					if (!insults.length) return;
 					insults.forEach(insult => {
@@ -72,14 +65,6 @@ export function storeMessage(message) {
 	}
 
 	const insults = getInsultsInMessage(message);
-	const brainrot = getBrainrotInMessage(message);
-
-	if (brainrot) {
-		if (!storedData[message.author.id].brainrot) {
-			storedData[message.author.id].brainrot = 0;
-		}
-		storedData[message.author.id].brainrot += brainrot.length;
-	}
 
 	if (insults) {
 		for (const insult of insults) {
