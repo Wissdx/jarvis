@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { CACHE_PATH } from "./get_all_messages.js";
 import { INSULTS } from "./insults.js";
+import { BRAINROT } from "./brainrot.js";
 
 const BASE_CREDIT = 100;
 
@@ -13,6 +14,10 @@ const normalizeString = (str) => {
 
 const insultRegex = new RegExp(
 	INSULTS.map((insult) => normalizeString(insult)).join("|"),
+	"g",
+)
+const brainrotRegex = new RegExp(
+	BRAINROT.map((brainrot) => normalizeString(brainrot)).join("|"),
 	"g",
 )
 
@@ -44,6 +49,10 @@ export async function handleSocialCredit(interaction) {
 
 		const userInsults = insultsCount[targetUser.id];
 
+		const brainrot = userInsults.brainrot;
+		// comme ca, ca le cache
+		userInsults.brainrot = 0;
+
 		const sortedInsults = Object.entries(userInsults).sort((a, b) => b[1] - a[1]);
 		const totalInsults = sortedInsults.reduce((sum, [_, count]) => sum + count, 0);
 
@@ -58,7 +67,7 @@ export async function handleSocialCredit(interaction) {
 
 		const header = "Compt. │ Insulte";
 		const divider = `${"─".repeat(7 + maxCountLength)}${"─".repeat(30)}`;
-		const socialCredits = BASE_CREDIT - totalInsults;
+		const socialCredits = BASE_CREDIT - totalInsults + brainrot;
 		let socialCreditStatus;
 
 		if (socialCredits >= 75) {
@@ -109,3 +118,12 @@ export const getInsultsInMessage = (message) => {
 	if (!insultsInMessage) return [];
 	return insultsInMessage;
 };
+
+export const getBrainrotInMessage = (message) => {
+	if (!message.content) return false;
+	if (message.author.bot) return false;
+	const content = normalizeString(message.content);
+	const brainrotInMessage = content.match(brainrotRegex);
+	if (!brainrotInMessage) return [];
+	return brainrotInMessage;
+}
