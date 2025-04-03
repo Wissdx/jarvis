@@ -1,0 +1,8 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./cache/messages.json:/cache/messages.json
+      - ./previousGrades.json:/previousGrades.json
