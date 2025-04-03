@@ -3,15 +3,17 @@ import { getInsultsInMessage } from "./social_credit_tracker.js";
 
 export const CACHE_PATH = "./cache/messages.json";
 
+const getChannels = async (guild) => await guild.channels
+.fetch()
+.then((channels) => channels.filter((channel) => channel.type === 0));
+
 export async function getAllMessages(client) {
 	const guild = await client.guilds.fetch(process.env.GUILD_ID);
-	const channels = await guild.channels
-		.fetch()
-		.then((channels) => channels.filter((channel) => channel.type === 0));
+	const channels = await getChannels(guild);
 
 	const storedData = {};
 
-	for (const [_, channel] of channels) {
+	const channelsResults = channels.forEach(async (channel) => {
 		try {
 			let lastMessageId = null;
 
@@ -25,27 +27,29 @@ export async function getAllMessages(client) {
 				if (messages.size === 0) break;
 				lastMessageId = messages.last().id;
 
-				for (const message of messages.values()) {
-					if (message.author.bot) continue;
+				messages.values().forEach(message => {
+					if (message.author.bot) return;
 
 					if (!storedData[message.author.id]) {
 						storedData[message.author.id] = {};
 					}
 
 					const insults = getInsultsInMessage(message);
-					if (!insults.length) continue;
-					for (const insult of insults) {
+					if (!insults.length) return;
+					insults.forEach(insult => {
 						if (!storedData[message.author.id][insult]) {
 							storedData[message.author.id][insult] = 0;
 						}
 						storedData[message.author.id][insult]++;
-					}
-				}
+					});
+				});
 			}
 		} catch (error) {
 			console.error("Error on messages retrieval:", error);
 		}
-	}
+	});
+
+	await Promise.all(channelsResults);
 
 	const jsonData = JSON.stringify(storedData, null, 2);
 	writeFileSync(CACHE_PATH, jsonData, "utf8");
