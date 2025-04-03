@@ -265,7 +265,7 @@ client.on("interactionCreate", async (interaction) => {
 client.on("messageCreate", async (message) => {
 	if (message.author.bot) return;
 
-	storeMessage(message);
+	storeMessage(message, client);
 })
 
 async function handleNonVotants(interaction) {
