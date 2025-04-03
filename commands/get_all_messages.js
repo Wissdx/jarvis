@@ -1,5 +1,5 @@
 import { writeFileSync, readFileSync } from "node:fs";
-import { getInsultsInMessage, getBrainrotInMessage } from "./social_credit_tracker.js";
+import { getInsultsInMessage } from "./social_credit_tracker.js";
 
 export const CACHE_PATH = "./cache/messages.json";
 
@@ -31,17 +31,10 @@ export async function getAllMessages(client) {
 					if (message.author.bot) return;
 
 					if (!storedData[message.author.id]) {
-						storedData[message.author.id] = {
-							brainrot: 0,
-						};
+						storedData[message.author.id] = {};
 					}
 
 					const insults = getInsultsInMessage(message);
-					const brainrot = getBrainrotInMessage(message);
-
-					if (brainrot) {
-						storedData[message.author.id].brainrot += brainrot.length;
-					}
 
 					if (!insults.length) return;
 					insults.forEach(insult => {
@@ -64,7 +57,7 @@ export async function getAllMessages(client) {
 	console.log("All messages stored successfully.");
 }
 
-export function storeMessage(message) {
+export async function storeMessage(message, client) {
 	const storedData = JSON.parse(readFileSync(CACHE_PATH, "utf8"));
 
 	if (!storedData[message.author.id]) {
@@ -72,14 +65,6 @@ export function storeMessage(message) {
 	}
 
 	const insults = getInsultsInMessage(message);
-	const brainrot = getBrainrotInMessage(message);
-
-	if (brainrot) {
-		if (!storedData[message.author.id].brainrot) {
-			storedData[message.author.id].brainrot = 0;
-		}
-		storedData[message.author.id].brainrot += brainrot.length;
-	}
 
 	if (insults) {
 		for (const insult of insults) {
@@ -91,4 +76,23 @@ export function storeMessage(message) {
 	}
 
 	writeFileSync(CACHE_PATH, JSON.stringify(storedData, null, 2), "utf8");
+
+	const userInsults = storedData[message.author.id];
+
+	const sortedInsults = Object.entries(userInsults).sort((a, b) => b[1] - a[1]);
+	const totalInsults = sortedInsults.reduce((sum, [_, count]) => sum + count, 0);
+
+	let member = await message.guild.members.fetch(message.author.id).catch(console.error);
+
+	if (!member) {
+		console.error("Member not found in the guild.");
+		return;
+	}
+	let nickname = member.displayName || message.author.username;
+	let newNickName = `${nickname} [${100-totalInsults}]`;
+	if(/^.* \[-?[0-9]+\]$/.test(nickname)) newNickName = nickname.replace(/\[-?[0-9]+\]/, `[${100-totalInsults}]`);
+	member.setNickname(
+		newNickName,
+		"Updated nickname based on insults count"
+	).catch(console.error);
 }

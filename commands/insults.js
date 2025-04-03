@@ -1,4 +1,5 @@
 export const INSULTS = [
+    'attarde',
     'putain de merde',
     'nique ta mère',
     'fils de chien',
