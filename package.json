@@ -1,19 +1,19 @@
 {
-  "name": "jarvis",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "type": "module",
-  "scripts": {
-    "start": "node index.js"
-  },
-  "private": true,
-  "dependencies": {
-    "discord.js": "^14.16.3",
-    "dotenv": "^16.4.5"
-  },
-  "engines": {
-    "node": "^20",
-    "npm": "^10"
-  }
+	"name": "jarvis",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"type": "module",
+	"scripts": {
+		"start": "node index.js"
+	},
+	"private": true,
+	"dependencies": {
+		"discord.js": "^14.18.0",
+		"dotenv": "^16.4.5"
+	},
+	"engines": {
+		"node": "^22",
+		"npm": "^10"
+	}
 }

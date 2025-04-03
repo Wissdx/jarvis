@@ -1,0 +1,23 @@
+export const BRAINROT = [
+    "sigma",
+    "rizz",
+    "skibidi",
+    "mog",
+    "bussin",
+    "aura",
+    "ohio",
+    "mew",
+    "sus",
+    "cap",
+    "yeet",
+    "lowkey",
+    "just put the fries in the bag",
+    "delulu",
+    "opps",
+    "twin",
+    "drip",
+    "mad lit",
+    "glaze",
+    "slay",
+    "yapping"
+]

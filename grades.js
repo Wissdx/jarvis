@@ -2,7 +2,7 @@ import { existsSync, lstatSync, readFileSync, writeFileSync } from 'fs';
 import dotenv from 'dotenv';
 dotenv.config()
 
-const cachePath = './previousGrades.json';
+const cachePath = './cache/previousGrades.json';
 
 export async function sendNewGrades(discordClient) {
     let token = await getAccessToken();
