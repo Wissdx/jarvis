@@ -28,7 +28,7 @@ const images = {
 
 export async function handleSocialCredit(interaction) {
 	try {
-		await interaction.deferReply({ ephemeral: true });
+		await interaction.deferReply();
 
 		const targetUser = interaction.options.getUser("utilisateur");
 		if (!targetUser) {
